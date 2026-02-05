@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import subprocess
 import asyncio
 import pandas as pd
 import time
@@ -16,25 +17,73 @@ from openpyxl.utils import get_column_letter
 
 
 # --- PATH CONFIGURATION & IMPORTS ---
-MCP_BASE = r"C:\Users\HMz\Documents\Source\McpServer"
-sys.path.append(os.path.join(MCP_BASE, "tiingo-mcp-server"))
+if sys.platform == "win32":
+    MCP_BASE = r"C:\Users\HMz\Documents\Source\McpServer"
+    sys.path.append(os.path.join(MCP_BASE, "tiingo-mcp-server"))
+    try:
+        from tiingo_mcp_server.tiingo_functions import (
+            get_ticker_price_sync as tiingo_get_price,
+            get_news_sync as tiingo_get_news,
+        )
+    except ImportError as e:
+        print(f"❌ Critical Import Error (Tiingo): {e}")
+        sys.exit(1)
+else:
+    # Linux: Tiingo runs via subprocess in its own venv (different Python versions OK)
+    MCP_BASE = "/home/dev/proj/quantrosoft/mcp-server"
+    TIINGO_MCP_PATH = os.path.join(MCP_BASE, "tiingo-mcp-server")
+    TIINGO_PYTHON = os.path.join(TIINGO_MCP_PATH, ".venv", "bin", "python")
+    TIINGO_RUNNER = os.path.join(TIINGO_MCP_PATH, "tiingo_runner.py")
 
-# Imports from MCP Servers
-try:
-    from tiingo_mcp_server.tiingo_functions import (
-        get_ticker_price_sync as tiingo_get_price,
-        get_news_sync as tiingo_get_news,
-    )
-except ImportError as e:
-    print(f"❌ Critical Import Error (Tiingo): {e}")
-    sys.exit(1)
+    def _run_tiingo(cmd: list) -> list | dict:
+        """Run tiingo_runner.py via tiingo venv; returns parsed JSON or [] on error."""
+        if not os.path.isfile(TIINGO_PYTHON):
+            raise RuntimeError(f"Tiingo venv not found at {TIINGO_PYTHON}. Install: python -m venv .venv && pip install -r requirements.txt")
+        if not os.path.isfile(TIINGO_RUNNER):
+            raise RuntimeError(f"Tiingo runner not found at {TIINGO_RUNNER}")
+        env = os.environ.copy()
+        result = subprocess.run(
+            [TIINGO_PYTHON, TIINGO_RUNNER] + cmd,
+            capture_output=True,
+            text=True,
+            cwd=TIINGO_MCP_PATH,
+            env=env,
+            timeout=60,
+        )
+        if result.returncode != 0:
+            err = result.stderr or result.stdout or "Unknown error"
+            raise RuntimeError(f"Tiingo runner failed: {err}")
+        out = result.stdout.strip()
+        if not out:
+            return []
+        data = json.loads(out)
+        if isinstance(data, dict) and "error" in data:
+            raise RuntimeError(data["error"])
+        return data
+
+    def tiingo_get_price(ticker: str):
+        """Get ticker price via tiingo venv subprocess."""
+        return _run_tiingo(["get_ticker_price", ticker])
+
+    def tiingo_get_news(tickers=None, limit: int = 20, **kwargs):
+        """Get news via tiingo venv subprocess."""
+        cmd = ["get_news", "--limit", str(limit)]
+        if tickers is not None:
+            t = tickers if isinstance(tickers, str) else ",".join(tickers) if tickers else ""
+            if t:
+                cmd.extend(["--tickers", t])
+        return _run_tiingo(cmd)
+
+    # t_news = tiingo_get_news(tickers=None, limit=50) 
 
 # Alpaca
 try:
     from alpaca.data.historical import StockHistoricalDataClient, NewsClient
     from alpaca.data.requests import StockLatestQuoteRequest, NewsRequest
     ALPACA_AVAILABLE = True
-except ImportError:
+    print("Alpaca: OK")
+except ImportError as e:
+    print("Alpaca import failed:", type(e).__name__, e)
     ALPACA_AVAILABLE = False
 
 # Trade Republic (DISABLED due to 2FA requirement)
@@ -273,7 +322,11 @@ async def get_forex_rate(base="EUR", quote="USD"):
     return None
 
 # Web Price Cache (persistent)
-WEB_PRICE_CACHE_FILE = r"G:\Meine Ablage\ShareFile\NewsTrader\web_price_cache.json"
+if sys.platform == "win32":
+    WEB_PRICE_CACHE_FILE = r"G:\Meine Ablage\ShareFile\NewsTrader\web_price_cache.json"
+else:
+    WEB_PRICE_CACHE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    WEB_PRICE_CACHE_FILE = os.path.join(WEB_PRICE_CACHE_DIR, "web_price_cache.json")
 
 def load_web_price_cache():
     """Load web price source cache from disk."""
@@ -288,6 +341,9 @@ def load_web_price_cache():
 def save_web_price_cache(cache):
     """Save web price source cache to disk."""
     try:
+        cache_dir = os.path.dirname(WEB_PRICE_CACHE_FILE)
+        if cache_dir and not os.path.exists(cache_dir):
+            os.makedirs(cache_dir, exist_ok=True)
         with open(WEB_PRICE_CACHE_FILE, 'w', encoding='utf-8') as f:
             json.dump(cache, f, indent=2, ensure_ascii=False)
     except Exception as e:
@@ -972,7 +1028,8 @@ OUTPUT (JSON):
 
     try:
         response = await ANTHROPIC_CLIENT.messages.create(
-            model="claude-3-5-haiku-latest",
+            # model="claude-3-5-haiku-latest",
+            model="claude-3-haiku-20240307",
             max_tokens=1000,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1006,8 +1063,11 @@ OUTPUT (JSON):
 async def main():
     global ib_client, Global_EURUSD
     
-    # Paths (Setup first for Logging)
-    base_dir = r"G:\Meine Ablage\ShareFile\NewsTrader"
+    # Paths (Setup first for Logging) - same folder as web price cache on Linux
+    if sys.platform == "win32":
+        base_dir = r"G:\Meine Ablage\ShareFile\NewsTrader"
+    else:
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     positions_file = os.path.join(base_dir, "Open_Positions.xlsx")
     analysen_dir = os.path.join(base_dir, "Analysen")
     today_str = datetime.now().strftime('%y%m%d')
@@ -1402,6 +1462,7 @@ async def main():
             asset = assets[i]
             asset_name = result.get('Asset', '')
             ticker = result.get('Ticker', '')
+            cache_key = ticker or asset.get('ISIN', '')
             
             source_type = ''
             source_detail = ''
@@ -1419,9 +1480,11 @@ async def main():
                     source_type = web_data.get('source', 'Web')
                     source_detail = web_data.get('url', '')
                     price_value = web_data.get('price')
+                    # Update cache for future runs
+                    if cache_key and source_detail:
+                        cache[cache_key] = {'source': source_type, 'url': source_detail}
             
             # Check cache for web URL (even if not used this time)
-            cache_key = ticker or asset.get('ISIN', '')
             cached_url = ''
             if cache_key in cache:
                 cached_url = cache[cache_key].get('url', '')
@@ -1439,6 +1502,7 @@ async def main():
                 'Fetched At': result.get('FetchedAt', '')
             })
         
+        save_web_price_cache(cache)
         if price_sources:
             price_df = pd.DataFrame(price_sources)
             price_df.to_excel(writer, sheet_name='Price Sources', index=False)

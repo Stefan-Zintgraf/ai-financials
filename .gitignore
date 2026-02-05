@@ -4,4 +4,5 @@ NewsTrader/
 
 # Never commit secrets
 **/env.txt
+NewsTrader/Scripts/env.txt
 **/.env

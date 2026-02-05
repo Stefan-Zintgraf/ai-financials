@@ -1,4 +1,10 @@
+alpaca-py
 anthropic
-pandas
-openpyxl
 claude_agent_sdk
+openpyxl
+pandas
+python-dotenv
+pytz
+reportlab
+requests
+tiingo
