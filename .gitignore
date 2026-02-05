@@ -1,3 +1,7 @@
 # Include only benchmark_prompts - ignore other project folders
 MyIbkrNewsTrader/
 NewsTrader/
+
+# Never commit secrets
+**/env.txt
+**/.env
