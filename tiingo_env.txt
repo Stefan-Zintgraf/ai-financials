@@ -1,0 +1,12 @@
+# Tiingo API Configuration
+# Get your API key from https://www.tiingo.com/account/api/token
+TIINGO_API_KEY=268b866646a22b306247542c2d05e6fbb378ee1a
+
+# Logging Configuration
+# Set to 'true' or '1' to enable extensive JSON logging of all MCP requests/responses
+LOG_MCP=false
+
+# ChatGPT Integration (Optional - for Web Service Mode)
+# CHATGPT_MODE=true
+# CHATGPT_API_KEY=your_secure_random_key_here
+# PUBLIC_URL=https://your-server-url.com

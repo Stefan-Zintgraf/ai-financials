@@ -1,0 +1,19 @@
+ALPACA_API_KEY=PKAT6YKNESDSNWN245C4XEGGLO
+ALPACA_SECRET_KEY=Asu4vrsqWdxGBcNnQqct8bTKSq5CYLR1rv2x6jPbxTNH
+ALPACA_PAPER_TRADE=True
+TRADE_API_URL=https://paper-api.alpaca.markets
+DATA_API_URL=https://data.alpaca.markets
+
+# ============================================================================
+# Read-Only Mode (Trading Protection)
+# ============================================================================
+# SCHREIBGESCHUETZTE_API=true  -> Trading disabled (safe, read-only)
+# SCHREIBGESCHUETZTE_API=false -> Trading enabled (can place/cancel orders)
+SCHREIBGESCHUETZTE_API=true
+
+# ============================================================================
+# MCP Logging
+# ============================================================================
+# LOG_MCP=1  -> Enable logging of all MCP tool calls to log_mcp.json
+# LOG_MCP=0  -> Disable logging (default)
+LOG_MCP=0
