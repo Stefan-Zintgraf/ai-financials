@@ -1,0 +1,21 @@
+---
+description: Use venv when running NewsTrader Scripts
+globs: Scripts/**/*.py
+alwaysApply: false
+---
+
+# NewsTrader Scripts – Virtual Environment
+
+When running any Python script from `Scripts/` (including `AnalyzePortfolio_Pipeline.py`), activate the venv first.
+
+From the NewsTrader project root:
+
+```bash
+cd Scripts && . .venv/bin/activate && python <script> [args]
+```
+
+Example for the pipeline:
+
+```bash
+cd Scripts && . .venv/bin/activate && python AnalyzePortfolio_Pipeline.py
+```

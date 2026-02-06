@@ -6,11 +6,12 @@ import pandas as pd
 from datetime import datetime
 
 import config
+import llm_provider
 from utils import Tee
 from data_providers import get_forex_rate, ALPACA_AVAILABLE
 from price_search import deep_dive_price_search
 from news import aggregate_news
-from ai_analysis import analyze_data, troubleshoot_no_price
+from ai_analysis import analyze_data, troubleshoot_no_price, write_llm_debug
 from pdf_report import create_pdf
 from excel_report import save_analysis_excel
 
@@ -110,21 +111,23 @@ async def main():
 
     positions_file = os.path.join(base_dir, "Open_Positions.xlsx")
     watchlist_file = os.path.join(base_dir, "Watch_Positions.xlsx")
-    if config.DUMMY_ANALYSIS:
+    use_debug_files = config.DUMMY_ANALYSIS or config.QUICK_ANALYSIS
+    if use_debug_files:
         pos_debug = os.path.join(base_dir, "Open_Positions_Debug.xlsx")
         watch_debug = os.path.join(base_dir, "Watch_Positions_Debug.xlsx")
+        prefix = "[DUMMY]" if config.DUMMY_ANALYSIS else "[QUICK]"
         if os.path.exists(pos_debug):
             positions_file = pos_debug
-            print(f"[DUMMY] Using debug positions: {pos_debug}")
+            print(f"{prefix} Using debug positions: {pos_debug}")
         if os.path.exists(watch_debug):
             watchlist_file = watch_debug
-            print(f"[DUMMY] Using debug watchlist: {watch_debug}")
+            print(f"{prefix} Using debug watchlist: {watch_debug}")
 
     analysen_dir = os.path.join(base_dir, "Analysen")
     today_str = datetime.now().strftime("%y%m%d")
     daily_folder = os.path.join(analysen_dir, today_str)
     os.makedirs(daily_folder, exist_ok=True)
-    debug_suffix = "_DEBUG" if config.DUMMY_ANALYSIS else ""
+    debug_suffix = "_DEBUG" if use_debug_files else ""
     output_file = os.path.join(daily_folder, f"{today_str} Portfolio_Pipeline_Analyse{debug_suffix}.xlsx")
     log_file_path = os.path.join(daily_folder, f"{today_str}_Pipeline.log")
 
@@ -144,6 +147,18 @@ async def main():
     print(f"{'='*50}\n")
 
     config.load_env_keys()
+    config.apply_cli_overrides()
+
+    # Initialize and verify LLM (unless dummy mode)
+    if not config.DUMMY_ANALYSIS:
+        try:
+            llm_provider.init_llm()
+            await llm_provider.verify_llm()
+        except Exception as e:
+            print(f"FATAL: LLM not available: {e}")
+            sys.exit(1)
+    else:
+        print("[DUMMY] Skipping LLM initialization.")
 
     print(f"Cleaning up old analysis files for {today_str}...")
     try:
@@ -208,7 +223,7 @@ async def main():
         results.append(final_record)
         try:
             safe_name = "".join([c for c in asset.get("Asset", "Unknown") if c.isalpha() or c.isdigit()]).strip()
-            create_pdf(os.path.join(daily_folder, f"{today_str}_{safe_name}{debug_suffix}.pdf"), final_record)
+            create_pdf(os.path.join(daily_folder, f"{today_str}_{safe_name}{debug_suffix}.pdf"), final_record, config.get_model_display_name())
         except Exception:
             pass
 
@@ -224,10 +239,13 @@ async def main():
             watchlist_results.append(final_record)
             try:
                 safe_name = "".join([c for c in asset.get("Asset", "Unknown") if c.isalpha() or c.isdigit()]).strip()
-                create_pdf(os.path.join(daily_folder, f"{today_str}_CHECK_{safe_name}{debug_suffix}.pdf"), final_record)
+                create_pdf(os.path.join(daily_folder, f"{today_str}_CHECK_{safe_name}{debug_suffix}.pdf"), final_record, config.get_model_display_name())
             except Exception:
                 pass
 
     save_analysis_excel(output_file, results, watchlist_results, assets)
+
+    if config.QUICK_ANALYSIS:
+        write_llm_debug(daily_folder)
 
     print(f"\nPipeline Complete. Saved to {output_file}")

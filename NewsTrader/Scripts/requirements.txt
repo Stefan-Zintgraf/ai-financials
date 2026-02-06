@@ -1,8 +1,12 @@
 alpaca-py
-anthropic
-claude_agent_sdk
+httpx
+langchain-anthropic
+langchain-core
+langchain-ollama
+langchain-openai
 openpyxl
 pandas
+pydantic>=2
 python-dotenv
 pytz
 reportlab

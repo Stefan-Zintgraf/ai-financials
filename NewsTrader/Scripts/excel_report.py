@@ -170,7 +170,9 @@ def save_analysis_excel(output_file, results, watchlist_results, assets):
                 if idx_recommendation != -1:
                     cell_rec = worksheet.cell(row=row_idx, column=idx_recommendation)
                     val = str(cell_rec.value or "").lower()
-                    if "sell" in val or "verkauf" in val:
+                    if "[parse failed]" in val or "[missing]" in val or "[invalid]" in val:
+                        cell_rec.fill = fill_red
+                    elif "sell" in val or "verkauf" in val:
                         if "partial" not in val and "teil" not in val:
                             cell_rec.fill = fill_red
                         else:

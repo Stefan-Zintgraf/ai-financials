@@ -1,18 +1,19 @@
 ---
 name: newstrader-testing
-description: When testing, debugging, fixing, or running a test of the NewsTrader pipeline, use --dummy-analysis to skip real AI API calls. Use when the user asks to test the script, debug the script, fix bugs, run the pipeline, or execute AnalyzePortfolio_Pipeline.
+description: When testing the NewsTrader pipeline, run real LLM (--quick-analysis) or dummy (--dummy-analysis) mode. Ask which mode only if the user does not clearly specify. Use when the user asks to test the script, debug the script, fix bugs, run the pipeline, or execute AnalyzePortfolio_Pipeline.
 ---
 
 # NewsTrader Pipeline Testing
 
-When running or testing `AnalyzePortfolio_Pipeline.py` (or any script that invokes the pipeline), always pass the `--dummy-analysis` flag:
+If the user clearly specifies which mode (e.g. "quick test with real model", "real LLM", "dummy", "simulated", "no AI"), run that mode directly. Otherwise, ask: **"Which test mode? (a) Real LLM – to check prompts or model behavior; (b) Dummy – no AI, test data flow, Excel, PDF, etc."**
 
-```bash
-python AnalyzePortfolio_Pipeline.py --dummy-analysis
-```
+Run (from NewsTrader root, with venv):
 
-This skips real Anthropic API calls and generates deterministic dummy results instead. This saves time, money, and avoids rate limits during development and debugging.
+- **a** → `cd Scripts && . .venv/bin/activate && python AnalyzePortfolio_Pipeline.py --quick-analysis`
+- **b** → `cd Scripts && . .venv/bin/activate && python AnalyzePortfolio_Pipeline.py --dummy-analysis`
 
-In dummy mode, the pipeline also uses `Open_Positions_Debug.xlsx` and `Watch_Positions_Debug.xlsx` (if they exist) instead of the production input files.
+**Real LLM** (`--quick-analysis`): Uses debug input files, real AI calls. For testing prompt changes or model integration.
 
-Never run the pipeline without `--dummy-analysis` unless the user explicitly asks for a real/live analysis run.
+**Dummy** (`--dummy-analysis`): Skips AI, uses placeholder results. For testing data flow, reports, news aggregation, etc.
+
+Never run a full production run (no flags) unless the user explicitly asks for it.

@@ -2,6 +2,67 @@
 import os
 import sys
 
+# --- CLI OVERRIDES ---
+# Parsed from --provider=, --mode=, --multistep=, --multistep_thr=
+# Applied after load_env_keys(); overrides env.txt.
+
+
+def apply_cli_overrides():
+    """Parse CLI args and override os.environ. Call after load_env_keys()."""
+    provider = None
+    mode = None
+    multistep = None
+    multistep_thr = None
+    for arg in sys.argv[1:]:
+        if arg.startswith("--provider="):
+            provider = arg.split("=", 1)[1].strip().lower()
+        elif arg.startswith("--mode="):
+            mode = arg.split("=", 1)[1].strip()
+        elif arg.startswith("--multistep="):
+            multistep = arg.split("=", 1)[1].strip().lower()
+        elif arg.startswith("--multistep_thr="):
+            multistep_thr = arg.split("=", 1)[1].strip()
+
+    if provider:
+        os.environ["AI_PROVIDER"] = provider
+        print(f"  CLI override: AI_PROVIDER={provider}")
+    if mode:
+        p = os.environ.get("AI_PROVIDER", "anthropic").lower()
+        if p == "ollama":
+            os.environ["OLLAMA_MODEL"] = mode
+        elif p == "anthropic":
+            os.environ["ANTHROPIC_MODEL"] = mode
+        elif p == "openai":
+            os.environ["OPENAI_MODEL"] = mode
+        print(f"  CLI override: model={mode}")
+    if multistep in ("on", "off"):
+        os.environ["AI_MULTI_STEP"] = multistep
+        print(f"  CLI override: AI_MULTI_STEP={multistep}")
+    if multistep_thr is not None:
+        try:
+            int(multistep_thr)
+            os.environ["AI_MULTI_STEP_THRESHOLD"] = multistep_thr
+            print(f"  CLI override: AI_MULTI_STEP_THRESHOLD={multistep_thr}")
+        except ValueError:
+            pass
+
+
+def get_model_display_name() -> str:
+    """Return human-readable provider/model for PDF content (e.g. 'ollama / tinyllama:latest')."""
+    if DUMMY_ANALYSIS:
+        return "dummy"
+    provider = os.environ.get("AI_PROVIDER", "anthropic").lower()
+    if provider == "ollama":
+        model = os.environ.get("OLLAMA_MODEL", "llama3.2:1b")
+    elif provider == "anthropic":
+        model = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-haiku-latest")
+    elif provider == "openai":
+        model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    else:
+        model = "unknown"
+    return f"{provider} / {model}"
+
+
 # --- PATH CONFIGURATION ---
 if sys.platform == "win32":
     MCP_BASE = r"C:\Users\HMz\Documents\Source\McpServer"
@@ -23,10 +84,12 @@ ALPACA_KEY = None
 ALPACA_SECRET = None
 TR_PHONE = None
 TR_PIN = None
-ANTHROPIC_CLIENT = None
 
 # When True: skip AI calls, use debug input files, output xlsx/pdf with _DEBUG suffix
 DUMMY_ANALYSIS = False
+
+# When True: use real LLM but debug input files only; output with _DEBUG suffix (quick sanity check)
+QUICK_ANALYSIS = False
 
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -34,9 +97,7 @@ if sys.platform == "win32":
 
 def load_env_keys():
     """Load API keys from local env.txt and MCP server dist folders."""
-    global TIINGO_KEY, ANTHROPIC_CLIENT, ALPACA_KEY, ALPACA_SECRET, TR_PHONE, TR_PIN
-
-    import anthropic
+    global TIINGO_KEY, ALPACA_KEY, ALPACA_SECRET, TR_PHONE, TR_PIN
 
     env_paths = [
         "env.txt",
@@ -69,12 +130,5 @@ def load_env_keys():
         )
         TR_PHONE = os.environ.get("TRADE_REPUBLIC_PHONE")
         TR_PIN = os.environ.get("TRADE_REPUBLIC_PIN")
-
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if api_key:
-            ANTHROPIC_CLIENT = anthropic.AsyncAnthropic(api_key=api_key)
-            print("Anthropic Client initialized.")
-        else:
-            print("Warning: ANTHROPIC_API_KEY not found in any env.txt.")
     else:
         print("Warning: No env.txt files found in any search locations.")

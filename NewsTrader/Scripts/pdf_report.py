@@ -8,8 +8,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
 
-def create_pdf(filename, item):
-    """Generate a PDF report for a single asset analysis."""
+def create_pdf(filename, item, model_name=None):
+    """Generate a PDF report for a single asset analysis. model_name is shown in the content if provided."""
     doc = SimpleDocTemplate(
         filename,
         pagesize=letter,
@@ -36,6 +36,8 @@ def create_pdf(filename, item):
     story.append(
         Paragraph(f"Date: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}", normal_style)
     )
+    if model_name:
+        story.append(Paragraph(f"<b>Model:</b> {model_name}", normal_style))
     story.append(Spacer(1, 6))
 
     if "Ticker" in item:

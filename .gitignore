@@ -5,8 +5,10 @@ NewsTrader/.vscode/
 NewsTrader/Analysen/
 NewsTrader/web_price_cache.json
 NewsTrader/Scripts/.venv
-
-
+NewsTrader/Scripts/tests/last_llm_debug.json
+NewsTrader/Scripts/tests/run_all_tests_results.md
+NewsTrader/Scripts/tests/run_all_tests_results_paid.md
+NewsTrader/Scripts/tests/test_results.md
 
 # Never commit secrets
 **/env.txt
