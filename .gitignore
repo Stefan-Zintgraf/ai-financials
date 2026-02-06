@@ -1,6 +1,12 @@
 # Include only benchmark_prompts - ignore other project folders
-MyIbkrNewsTrader/
-NewsTrader/
+
+# IDE and generated output
+NewsTrader/.vscode/
+NewsTrader/Analysen/
+NewsTrader/web_price_cache.json
+NewsTrader/Scripts/.venv
+
+
 
 # Never commit secrets
 **/env.txt
