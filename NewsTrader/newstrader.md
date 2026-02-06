@@ -45,10 +45,12 @@ The project supports **stocks and derivatives** (e.g. certificates, turbos); for
    - **PDFs**: one per asset in the same folder.
    - **Log**: `<YYMMDD>_Pipeline.log` in the same folder.
 
+**Testing:** Use `--dummy-analysis` to skip AI calls and use debug input files (`Open_Positions_Debug.xlsx`, `Watch_Positions_Debug.xlsx`). Output files then get a `_DEBUG` suffix (e.g. `260206 Portfolio_Pipeline_Analyse_DEBUG.xlsx`).
+
 **How to run:**
 
 - From `Scripts/`:  
-  `python AnalyzePortfolio_Pipeline.py`
+  `python AnalyzePortfolio_Pipeline.py` (add `--dummy-analysis` for testing)
 - Or use the batch file:  
   `Scripts/Run_Analysis.bat`  
   (it only changes to `Scripts` and runs the pipeline).
