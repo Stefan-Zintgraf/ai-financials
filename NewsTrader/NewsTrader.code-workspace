@@ -4,7 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "../../quantrosoft/mcp-server/tiingo-mcp-server"
+			"path": "../brainstorming"
 		}
 	],
 	"settings": {}
