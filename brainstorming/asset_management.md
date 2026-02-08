@@ -1,8 +1,10 @@
-# AI-Driven Portfolio Optimization — Research & Architecture
+# AI-Driven Portfolio Management — Research & Architecture
 
 ## Table of Contents
 
 1. [Goal](#goal)
+   - [General Overview](#general-overview)
+   - [System Overview](#system-overview)
 2. [Architecture Overview](#architecture-overview)
 3. [Part I: Investment Universe & Asset Selection](#part-i-investment-universe--asset-selection)
    - [Universe Sources & Composition](#universe-sources--composition)
@@ -81,26 +83,47 @@
 
 ## Goal
 
-**Optimize a stock portfolio using AI-driven analysis.**
+**Manage a stock portfolio using AI-driven analysis.** An autonomous agent continuously collects market information, evaluates it against the current portfolio, and recommends concrete actions — buy, sell, hold, or rebalance — with documented reasoning. The system is designed to be self-improving: every pipeline stage produces auditable artifacts and tunable parameters whose optimal values are discovered through systematic experimentation.
 
-An autonomous agent (built with frameworks such as LangChain/LangGraph, monitored via LangSmith) should continuously:
+### General Overview
 
-1. **Define the investment universe** — maintain a dynamic list of candidate assets (stocks, ETFs, crypto, commodities) filtered by an optional master allow-list and continuously updated based on market conditions (Part I)
-2. **Collect** relevant information — financial news, market data, sentiment, regulatory filings (Part II)
-3. **Evaluate** that information — filter noise, assess sentiment, determine portfolio relevance (Part III)
-4. **Prepare** data for efficient AI consumption — structured formats, vector storage, context management (Part IV)
-5. **Contextualize** with portfolio data — current holdings, prices, fundamentals, technical indicators (Part V)
-6. **Analyze** the portfolio in light of new information — assess impact, weigh risk, identify opportunities (Part VI)
-7. **Recommend** concrete actions — buy, sell, hold, rebalance — with reasoning and confidence levels
-8. **Document every decision** — record the reasoning, evidence sources, and confidence behind each AI decision; cross-check against factual data to prevent hallucination-based actions
-9. **Evaluate & optimize** the pipeline itself — every step produces reviewable artifacts; parameters are systematically tuned based on outcomes (Part VIII)
-10. **Self-optimize** continuously — the system autonomously detects parameter staleness, runs counterfactual simulations, and proposes or applies adjustments (Part IX)
+The system follows a structured investment process: define which assets to watch, gather relevant market information, filter and evaluate it, then produce actionable recommendations — buy, sell, hold, or rebalance. Five workflows of increasing sophistication are available, ranging from a simple AI prompt all the way to a fully autonomous multi-agent system. Alternatively, the entire process can be delegated to a single AI agent guided by a mandate document that describes investment goals and constraints in plain language.
 
-News retrieval is a critical input to this process, but it is one of several data streams (alongside price data, fundamentals, technical indicators, and strategy constraints) that feed the optimization engine. The investment universe (Part I) defines the scope of assets the system monitors, and together with the current portfolio and available liquidity, forms the basis for all buy/sell/hold decisions.
+Regardless of the chosen workflow, three principles apply throughout:
 
-**Crucially, this is not a "build once and run" system.** Each step has tunable parameters (source selection, filter thresholds, embedding models, prompt templates, etc.) whose optimal values can only be discovered through systematic experimentation and review. The pipeline must therefore produce auditable outputs at every stage — not just the final recommendation.
+- **Transparency** — every AI decision is documented with its reasoning, evidence, and confidence level.
+- **Human oversight** — a review and evaluation framework lets humans audit the system, run backtests, and compare configurations.
+- **Continuous improvement** — the system monitors its own performance and proposes parameter adjustments, subject to safety guardrails.
 
-**Alternative approach — Mandate-Driven (Workflow E):** Instead of building and prescribing each pipeline step explicitly, an alternative architecture encapsulates all of the above into a single **mandate document** (investment goals, universe constraints, portfolio state, decision guidelines) and delegates the entire research-analysis-decision process to an autonomous agent. The agent receives the mandate, decides internally how to research and analyze, and returns structured decisions with full evidence and reasoning. In this model, the mandate document becomes the sole optimization target — replacing the many per-step parameters with one human-readable artifact. Workflow E has two implementation levels: **Level 1** (simple agent, implementable right after Workflow B) and **Level 2** (full multi-agent internals, implementable after Workflow D). See Part VII, Workflow E for full details. Both approaches benefit equally from the evaluation framework (Part VIII) and self-optimization loop (Part IX).
+### System Overview
+
+The pipeline consists of nine interconnected parts, forming a continuous feedback loop:
+
+| Stage | Purpose | Key Inputs / Outputs |
+|-------|---------|---------------------|
+| **Part I — Investment Universe** | Maintain a dynamic list of candidate assets (stocks, ETFs, crypto, commodities) filtered by an optional master allow-list | Indices, screeners, watchlists → active ticker list |
+| **Part II — Data Collection** | Gather financial news, market data, sentiment, and regulatory filings | Ticker list → raw articles, headlines, filings |
+| **Part III — Evaluation** | Deduplicate, score relevance, assess sentiment and impact | Raw data → filtered, scored news items |
+| **Part IV — Data Preparation** | Structure data for AI consumption via embeddings, vector storage, chunking | Scored items → optimized context documents |
+| **Part V — Portfolio Context** | Enrich with current holdings, prices, fundamentals, and technical indicators | Context documents + portfolio state → complete analysis context |
+| **Part VI — Analysis & Decision** | LLM-powered analysis producing buy/sell/hold/rebalance recommendations with confidence levels and documented reasoning | Complete context → documented recommendations |
+| **Part VII — Workflows** | Five concrete implementation architectures (A–E) from simplest to most agentic | — |
+| **Part VIII — Evaluation & Optimization** | Human-driven experiment tracking, review cadences, backtesting, and A/B testing across all stages | Review docs from all parts → parameter adjustments |
+| **Part IX — Self-Optimization** | Autonomous counterfactual analysis, staleness detection, drift monitoring, shadow-mode testing, and guardrailed parameter rollout | Run data + market outcomes → continuous parameter updates |
+
+Data flows top-down from universe definition through analysis, while evaluation and self-optimization feed adjustments back into every stage. News retrieval (Part II) is one of several data streams — alongside price data, fundamentals, technical indicators, and strategy constraints — that feed the analysis engine. The investment universe (Part I), together with the current portfolio and available liquidity, forms the basis for all decisions.
+
+**Workflows at a glance:**
+
+| Workflow | Approach | Complexity | When to use |
+|----------|----------|-----------|-------------|
+| **A — One-Shot LLM** | Single prompt to an LLM with web search | Minimal | Prompt prototyping, baseline |
+| **B — Research API-First** | Online research LLM + separate analysis LLM | Low | First production-grade pipeline |
+| **C — Classic Pipeline** | Discrete modules for each Part (I–VI) | Medium | Full control over every stage |
+| **D — Multi-Agent (LangGraph)** | Specialized agents collaborating via LangGraph | High | Maximum flexibility and parallelism |
+| **E — Mandate-Driven Agent** | Single mandate document → autonomous agent | Variable (L1: low, L2: high) | Delegate entire process to agent |
+
+Workflows A–D implement the explicit pipeline; Workflow E replaces it with a mandate-driven agent. Workflow E Level 1 is implementable right after Workflow B; Level 2 requires the infrastructure from Workflow D.
 
 ---
 
