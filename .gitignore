@@ -3,6 +3,7 @@
 # IDE and generated output
 NewsTrader/.vscode/
 NewsTrader/Analysen/
+MyIbkrNewsTrader/Analysen/
 NewsTrader/web_price_cache.json
 NewsTrader/Scripts/.venv
 NewsTrader/Scripts/tests/last_llm_debug.json
@@ -14,3 +15,5 @@ NewsTrader/Scripts/tests/test_results.md
 **/env.txt
 NewsTrader/Scripts/env.txt
 **/.env
+.obsidian
+.vs

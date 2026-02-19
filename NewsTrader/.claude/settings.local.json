@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(schtasks /create /tn \"NewsTrader_Daily_Analysis\" /tr \"\"\"G:\\\\Meine Ablage\\\\ShareFile\\\\NewsTrader\\\\Run_Analysis.bat\"\"\" /sc daily /st 07:00 /f)",
+      "Bash(cmd.exe /c \"schtasks /create /tn \"\"NewsTrader_Daily_Analysis\"\" /tr \"\"G:\\\\Meine Ablage\\\\ShareFile\\\\NewsTrader\\\\Run_Analysis.bat\"\" /sc daily /st 07:00 /f\")",
+      "Bash(powershell.exe -Command \"schtasks /create /tn ''NewsTrader_Daily_Analysis'' /tr ''G:\\\\Meine Ablage\\\\ShareFile\\\\NewsTrader\\\\Run_Analysis.bat'' /sc daily /st 07:00 /f\")",
+      "Bash(powershell.exe -Command \"schtasks /query /tn ''NewsTrader_Daily_Analysis'' /v /fo list\")",
+      "Bash(powershell.exe -Command \"schtasks /delete /tn ''NewsTrader_Daily_Analysis'' /f; schtasks /create /tn ''NewsTrader_Daily_Analysis'' /tr ''G:\\\\Meine Ablage\\\\ShareFile\\\\NewsTrader\\\\Run_Analysis.bat'' /sc daily /st 07:00 /ru SYSTEM /f\")",
+      "Bash(powershell.exe -Command \"schtasks /create /tn ''NewsTrader_Daily_Analysis'' /tr ''G:\\\\Meine Ablage\\\\ShareFile\\\\NewsTrader\\\\Run_Analysis.bat'' /sc daily /st 07:00 /rl HIGHEST /f\")",
+      "Bash(powershell.exe -Command \"Start-Process taskschd.msc\")",
+      "Bash(powershell.exe -Command \"schtasks /run /tn ''NewsTrader_Daily_Analysis''\")",
+      "Bash(python AnalyzePortfolio_Pipeline.py:*)",
+      "Bash(git -C \"C:/PROJ/ai-financials\" status --short)"
+    ]
+  }
+}
