@@ -1,0 +1,8 @@
+# Normalize line endings across Windows and Linux:
+# - Text files are stored as LF in the repo.
+# - On Windows, use: git config core.autocrlf true
+#   so you get CRLF in your working copy and commits are normalized to LF.
+* text=auto
+
+# Batch files are run on Windows and should keep CRLF.
+*.bat text eol=crlf
