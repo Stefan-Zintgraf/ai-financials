@@ -18,3 +18,5 @@ NewsTrader/Scripts/tests/test_results.md
 **/env.txt
 NewsTrader/Scripts/env.txt
 **/.env
+.obsidian
+.vs
