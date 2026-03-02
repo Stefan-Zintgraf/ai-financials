@@ -1,11 +1,3 @@
-# Meeting-Vorbereitung: KI-Assistent für Vermögensverwaltung
-
-**Datum der Erstellung:** 2026-02-28
-**Meeting-Zeitrahmen:** max. 4 Stunden
-**Teilnehmer:** Stefan Zintgraf, Heinrich Munz (Domänenexperte), DIALOG
-
----
-
 ## Inhaltsverzeichnis
 
 1. [Kontext](#kontext)
@@ -48,14 +40,11 @@ Prompting, Workflow-Automatisierung, Vektordatenbanken, RAG, autonome Agenten
 
 ---
 
-## Vor dem Meeting: Abstimmung mit Heinrich Munz
+## Meeting Strategie
 
-Vor dem Termin unbedingt klären:
-
-- [ ] Welche Fragen hat er bereits vorbereitet?
-- [ ] Was weiß er schon über den Verwalter und dessen Arbeitsweise?
-- [ ] Grobe Rollenverteilung absprechen (wer fragt was?)
-- [ ] Doppelte Fragen vermeiden, Zeit optimal nutzen
+- Hmz traegt PPT vor, ggf. Handsup und Mockup
+- Szf macht Notizen, wie DIALOG darauf reagiert und was als Input fuer uns dienen kann
+- Falls Fragen von unten beantwortet wurden: Antwort dazuschreiben
 
 ---
 
