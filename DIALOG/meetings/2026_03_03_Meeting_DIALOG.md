@@ -5,7 +5,7 @@
    - [Ausgangslage](#ausgangslage)
    - [Asset-Klassen im Scope](#asset-klassen-im-scope)
    - [Technologie-Interessen](#technologie-interessen)
-2. [Vor dem Meeting: Abstimmung mit Heinrich Munz](#vor-dem-meeting-abstimmung-mit-heinrich-munz)
+2. [Meeting Strategie](#meeting-strategie)
 3. [Prio 1 — MUSS im Meeting geklärt werden](#prio-1--muss-im-meeting-geklärt-werden)
 4. [Prio 2 — SOLLTE im Meeting besprochen werden](#prio-2--sollte-im-meeting-besprochen-werden)
 5. [Prio 3 — KANN per Follow-up geklärt werden](#prio-3--kann-per-follow-up-geklärt-werden)
@@ -59,12 +59,22 @@ Prompting, Workflow-Automatisierung, Vektordatenbanken, RAG, autonome Agenten
 | 1 | Können Sie uns durch einen typischen Arbeitstag führen? | |
 | 2 | Wo verbringen Sie und Ihr Team die meiste Zeit — und wo wünschen Sie sich Entlastung? | |
 
+- Regulatorien (Vertraege pruefen)
+- Arbeitsvertraege
+- Marktreport und Prognosen
+- Youtube Video skripten
+
+
 ### Informationslandschaft erfassen
 
 | # | Frage | Notizen |
 |---|-------|---------|
 | 3 | Welche Informationsquellen nutzen Sie täglich? (Nachrichtenportale, Datenbanken, Newsletter, etc.) | |
+
+- TraderFox hat historischen Daten
+
 | 4 | Wie speichern und organisieren Sie Ihre Recherche-Ergebnisse aktuell? | |
+
 
 ### KI-Vision und Erwartungen
 
